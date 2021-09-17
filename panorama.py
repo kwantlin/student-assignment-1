@@ -306,15 +306,14 @@ def linear_blend(img1_warped, img2_warped):
 
     ### YOUR CODE HERE
     blend = np.linspace(1,0, num=right_margin - left_margin)
-    img1_weight = np.concatenate((np.ones(left_margin),blend,np.ones(out_W - right_margin)))
+    img1_weight = np.concatenate((np.ones(left_margin),blend,np.zeros(out_W - right_margin)))
     img1 = img1_warped * np.tile(img1_weight, (out_H, 1))
     
     blend = np.linspace(0,1,num=right_margin - left_margin)
-    img2_weight = np.concatenate((np.ones(left_margin), blend, np.ones(out_W - right_margin)))
+    img2_weight = np.concatenate((np.zeros(left_margin), blend, np.ones(out_W - right_margin)))
     img2 = img2_warped * np.tile(img2_weight, (out_H, 1))
     
     merged = img1 + img2
     ### END YOUR CODE
 
     return merged
-
