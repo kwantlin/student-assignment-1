@@ -194,7 +194,8 @@ def fit_affine_matrix(p1, p2):
     H = np.eye(3)
     
     ### YOUR CODE HERE
-    pass
+    H = np.linalg.lstsq(p2, p1, rcond=None)[0]
+    print(H)
     ### END YOUR CODE
 
     # Sometimes numerical issues cause least-squares to produce the last
