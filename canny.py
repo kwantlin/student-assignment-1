@@ -103,7 +103,7 @@ def suppression(F, D):
             else:
                 n1, n2 = (max(0,i-1), max(0,j-1)), (min(I.shape[0]-1, i+1), min(I.shape[1]-1,j+1))
                 
-            if F[i][j] > F[n1] or F[i][j] > F[n2]:
+            if F[i][j] >= F[n1] and F[i][j] >= F[n2]:
                 I[i][j] = F[i][j]
 
     return I
