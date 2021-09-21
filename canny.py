@@ -4,7 +4,7 @@ import numpy as np
 def filteredGradient(im, sigma):
     # Computes the smoothed horizontal and vertical gradient images for a given
     # input image and standard deviation. The convolution operation should use
-    # 0 padding.
+    # the default border handling provided by cv2.
     #
     # im: 2D float32 array with shape (height, width). The input image.
     # sigma: double. The standard deviation of the gaussian blur kernel.
