@@ -270,16 +270,19 @@ def ransac(keypoints1, keypoints2, matches, n_iters=200, threshold=20):
     # check indices of keypoints
     # order of multiplication
     for _ in range(n_iters):
+        # Getting random sample
         np.random.shuffle(matches)
         samples = matches[:n_samples]
         sample1 = pad(keypoints1[samples[:,0]])
         sample2 = pad(keypoints2[samples[:,1]])
         # print("sample shapes", sample1.shape, sample2.shape)
+        # Affine matrix
         H = np.linalg.lstsq(sample2, sample1, rcond=None)[0]
         H[:,2] = np.array([0, 0, 1])
         matched1_hat = matched2 @ H 
         diff = matched1 - matched1_hat
         dists = np.linalg.norm(diff, axis=1)
+        
         # print("dists shape", dists.shape)
         inliers = dists<threshold
         # print("inliers shape", inliers.shape)
