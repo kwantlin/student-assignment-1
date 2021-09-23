@@ -253,7 +253,6 @@ def ransac(keypoints1, keypoints2, matches, n_iters=200, threshold=20):
     n_inliers = 0
     
     H = np.eye(3)
-
     # RANSAC iteration start
     
     # Note: while there're many ways to do random sampling, please use
@@ -268,7 +267,8 @@ def ransac(keypoints1, keypoints2, matches, n_iters=200, threshold=20):
     '''
 
     ### YOUR CODE HERE
-    
+    # check indices of keypoints
+    # order of multiplication
     for _ in range(n_iters):
         np.random.shuffle(matches)
         samples = matches[:n_samples]
@@ -276,21 +276,23 @@ def ransac(keypoints1, keypoints2, matches, n_iters=200, threshold=20):
         sample2 = pad(keypoints2[samples[:,1]])
         # print("sample shapes", sample1.shape, sample2.shape)
         H = np.linalg.lstsq(sample2, sample1, rcond=None)[0]
-        matched1_hat = np.matmul(matched2, H)
+        H[:,2] = np.array([0, 0, 1])
+        matched1_hat = matched2 @ H 
         diff = matched1 - matched1_hat
         dists = np.linalg.norm(diff, axis=1)
         # print("dists shape", dists.shape)
         inliers = dists<threshold
         # print("inliers shape", inliers.shape)
         if np.count_nonzero(inliers) > n_inliers:
+            # calculate H again?
             max_inliers = inliers
             n_inliers = np.count_nonzero(inliers)
 
-    matches_inliers = matches[max_inliers]
+    matches_inliers = orig_matches[max_inliers]
     matched_inliers1 = pad(keypoints1[matches_inliers[:,0]])
     matched_inliers2 = pad(keypoints2[matches_inliers[:,1]])
     H = np.linalg.lstsq(matched_inliers2, matched_inliers1, rcond=None)[0]
-        
+    H[:,2] = np.array([0, 0, 1])
     ### END YOUR CODE
     return H, orig_matches[max_inliers]
 
