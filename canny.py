@@ -68,6 +68,13 @@ def edgeStrengthAndOrientation(Fx, Fy):
 #     print(orient)
     return F, D
 
+def discretize(D):
+    angles = np.array([0, pi/4, pi/2, 3*pi/4])
+    D_prime = np.zeros(D.shape)
+    for i in range(D.shape[0]):
+        for j in range(D.shape[1]):
+            D_prime[i][j] = angles[np.abs(angles - D[i][j]).argmin()]
+    return D_prime
 
 def suppression(F, D):
     # Runs nonmaximum suppression to create a thinned edge image.
@@ -82,12 +89,7 @@ def suppression(F, D):
     #        edge image.
 
     # For each pixel, find the direction 𝐷∗∈0,𝜋/4,𝜋/2,3𝜋/4 that is closest to the orientation 𝐷 at that pixel.
-    angles = np.array([0, pi/4, pi/2, 3*pi/4])
-    D_prime = np.zeros(D.shape)
-    for i in range(D.shape[0]):
-        for j in range(D.shape[1]):
-            D_prime[i][j] = angles[np.abs(angles - D[i][j]).argmin()]
-    # print(D_prime)
+    D_prime = discretize(D)
 
     # If the edge strength 𝐹(𝑥,𝑦) is smaller than at least one of its neighbors along 𝐷∗, 
     # set 𝐼(𝑥,𝑦)=0, else set 𝐼(𝑥,𝑦)=𝐹(𝑥,𝑦).
@@ -123,6 +125,7 @@ def hysteresisThresholding(I, D, tL, tH):
     # edgeMap: 2D binary array with shape (height, width). Output edge map,
     #          where edges are 1 and other pixels are 0. 
 
+    D = discretize(D)
     edgeMap = np.zeros(I.shape)
     I_normal = I / np.amax(I)
 
