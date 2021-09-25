@@ -2,18 +2,21 @@ import cv2
 import numpy as np
 from math import sqrt, pi
 
-def gauss(sigma): # get kernel of gaussian, sizes depends on sigma
+def gauss(sigma): # get vertical 1d gaussian
     half_size = 3*sigma
 
-    dim = 2*half_size+1
+    k = np.arange(-half_size, half_size+1, 1)
 
-    k = np.zeros((dim, dim), np.single)
+    return np.exp(np.square(k) / (-2*sigma**2)) / (sqrt(2*pi)*sigma)
 
-    for i in range(-half_size, half_size, 1):
-        for j in range(-half_size, half_size, 1):
-            k[i,j] = np.exp((i**2 + j**2) / (-2*sigma)) / (sigma*2*pi)
 
-    return k
+def deriv_gauss(sigma): # get vertical 1d gaussian derivative
+    half_size = 3*sigma
+
+    k = np.arange(-half_size, half_size+1, 1)
+
+    return np.exp(np.square(k) / (-2*sigma**2)) * (-k / (sqrt(2*pi)*sigma**3))
+
 
 def filteredGradient(im, sigma):
     # Computes the smoothed horizontal and vertical gradient images for a given
@@ -29,21 +32,14 @@ def filteredGradient(im, sigma):
     # Fy: 2D double array with shape (height, width). The vertical
     #     gradients.
 
-    kernel = gauss(sigma)
+    GpTy = np.expand_dims(deriv_gauss(sigma), axis=1)     # vertical derivative of a Gaussian for y
+    Gx = np.expand_dims(gauss(sigma), axis=0)            # horizontal gaussian for x
+    GTy = np.expand_dims(gauss(sigma), axis=1)             # vertical Gaussian y
+    Gpx = np.expand_dims(deriv_gauss(sigma), axis=0)   # horizontal derivative of Gaussian for x
 
-    # deriv of gaussian in x direction
-    xconv = np.array([[-1, 1, 0]])
-    dx = cv2.filter2D(kernel,-1,xconv)
-    Fx = cv2.filter2D(im,-1,dx)
-    # print(np.amax(Fx))
-    # cv2.imwrite("fx.jpeg", Fx)
+    Fx = cv2.filter2D((cv2.filter2D(im, -1, GTy)), -1, Gpx)
+    Fy = cv2.filter2D((cv2.filter2D(im, -1, Gx)), -1, GpTy)
 
-    # deriv of gaussian in y direction
-    yconv = np.array([[-1], [1], [0]])
-    dy = cv2.filter2D(kernel,-1,yconv)
-    Fy = cv2.filter2D(im,-1,dy)
-    # cv2.imwrite("fy.jpeg", Fy)
-    # print(np.amax(Fy))
     return Fx, Fy
 
 
@@ -63,9 +59,7 @@ def edgeStrengthAndOrientation(Fx, Fy):
     F = np.sqrt(np.square(Fx) + np.square(Fy))
     div = Fy / (Fx+(1e-13))
     D = np.arctan(div)
-#     print(orient)
     D = np.where(D > 0, D, D+pi)
-#     print(orient)
     return F, D
 
 def discretize(D):
