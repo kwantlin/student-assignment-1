@@ -17,6 +17,13 @@ def deriv_gauss(sigma): # get vertical 1d gaussian derivative
 
     return np.exp(np.square(k) / (-2*sigma**2)) * (-k / (sqrt(2*pi)*sigma**3))
 
+def discretize(D):
+    angles = np.array([0, pi/4, pi/2, 3*pi/4])
+    D_prime = np.zeros(D.shape)
+    for i in range(D.shape[0]):
+        for j in range(D.shape[1]):
+            D_prime[i][j] = angles[np.abs(angles - D[i][j]).argmin()]
+    return D_prime
 
 def filteredGradient(im, sigma):
     # Computes the smoothed horizontal and vertical gradient images for a given
@@ -61,14 +68,6 @@ def edgeStrengthAndOrientation(Fx, Fy):
     D = np.arctan(div)
     D = np.where(D > 0, D, D+pi)
     return F, D
-
-def discretize(D):
-    angles = np.array([0, pi/4, pi/2, 3*pi/4])
-    D_prime = np.zeros(D.shape)
-    for i in range(D.shape[0]):
-        for j in range(D.shape[1]):
-            D_prime[i][j] = angles[np.abs(angles - D[i][j]).argmin()]
-    return D_prime
 
 def suppression(F, D):
     # Runs nonmaximum suppression to create a thinned edge image.
