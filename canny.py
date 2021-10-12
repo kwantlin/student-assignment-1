@@ -174,6 +174,7 @@ def cannyEdgeDetection(im, sigma, tL, tH):
     Fx, Fy = filteredGradient(im, sigma)
     F, D = edgeStrengthAndOrientation(Fx, Fy)
     I = suppression(F, D)
+    cv2.imwrite("afternms.png", I*255)
     edgeMap = hysteresisThresholding(I, D, tL, tH)
     # print(edgeMap.shape)
 
